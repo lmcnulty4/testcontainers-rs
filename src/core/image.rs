@@ -143,6 +143,7 @@ pub struct RunnableImage<I: Image> {
     env_vars: BTreeMap<String, String>,
     volumes: BTreeMap<String, String>,
     ports: Option<Vec<Port>>,
+    shm_size: Option<String>,
 }
 
 impl<I: Image> RunnableImage<I> {
@@ -160,6 +161,10 @@ impl<I: Image> RunnableImage<I> {
 
     pub fn container_name(&self) -> &Option<String> {
         &self.container_name
+    }
+
+    pub fn shm_size(&self) -> &Option<String> {
+        &self.shm_size
     }
 
     pub fn env_vars(&self) -> Box<dyn Iterator<Item = (&String, &String)> + '_> {
@@ -205,6 +210,13 @@ impl<I: Image> RunnableImage<I> {
     pub fn with_tag(self, tag: impl Into<String>) -> Self {
         Self {
             image_tag: Some(tag.into()),
+            ..self
+        }
+    }
+
+    pub fn with_shm_size(self, shm_size: impl Into<String>) -> Self {
+        Self {
+            shm_size: Some(shm_size.into()),
             ..self
         }
     }
@@ -267,6 +279,7 @@ impl<I: Image> From<(I, I::Args)> for RunnableImage<I> {
             env_vars: BTreeMap::default(),
             volumes: BTreeMap::default(),
             ports: None,
+            shm_size: None,
         }
     }
 }

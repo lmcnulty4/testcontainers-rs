@@ -157,6 +157,10 @@ impl Client {
             command.arg("--entrypoint").arg(entrypoint);
         }
 
+        if let Some(shm_size) = image.shm_size() {
+            command.arg("--shm-size").arg(shm_size);
+        }
+
         let is_container_networked = image
             .network()
             .as_ref()
@@ -549,6 +553,18 @@ mod tests {
         assert_eq!(
             format!("{:?}", command),
             r#""docker" "run" "--name=hello_container" "-P" "-d" "hello:0.0""#
+        );
+    }
+
+    #[test]
+    fn cli_run_command_should_include_shm_size() {
+        let image = GenericImage::new("hello", "0.0");
+        let image = RunnableImage::from(image).with_shm_size("1g");
+        let command = Client::build_run_command(&image, Command::new("docker"));
+
+        assert_eq!(
+            format!("{:?}", command),
+            r#""docker" "run" "--shm-size" "1g" "-P" "-d" "hello:0.0""#
         );
     }
 
